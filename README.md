@@ -7,15 +7,10 @@ A production-style backend system built using Java Spring Boot Microservices, im
 The Patient Management System simulates a hospital backend where multiple independent services interact using REST, gRPC, and Kafka, coordinated through an API Gateway.
 
 Microservices
-
 API Gateway
-
 Auth Service
-
 Patient Service
-
 Billing Service
-
 Analytics Service
 
 🧱 System Architecture
@@ -31,59 +26,44 @@ API Gateway
           ↓
         Kafka
 
+
 🏗 Architecture Highlights
 
 JWT-based authentication
-
 gRPC server in Billing Service
-
 gRPC client in Patient Service
-
 Kafka-based event-driven communication
-
 Patient Service → Kafka Producer
-
 Analytics Service → Kafka Consumer
-
 Dockerized microservices
-
 Cloud-ready (AWS)
 
 🛠 Tech Stack
 
 Java 17
-
 Spring Boot
-
 Spring Security + JWT
-
 Spring Data JPA
-
 REST APIs
-
 gRPC (Protocol Buffers)
-
 Apache Kafka
-
 Docker & Docker Compose
-
 Maven
-
-MySQL / PostgreSQL
+PostgreSQL
 
 ✨ Key Features
 
-Secure authentication & authorization
+-Secure authentication & authorization
 
-Microservices-based architecture
+-Microservices-based architecture
 
-gRPC synchronous communication (Patient → Billing)
+-gRPC synchronous communication (Patient → Billing)
 
-Kafka asynchronous event processing
+-Kafka asynchronous event processing
 
-Centralized API Gateway
+-Centralized API Gateway
 
-Containerized services
+-Containerized services
 
 📡 Inter-Service Communication
 gRPC
@@ -122,8 +102,8 @@ REST APIs:
 
 http://localhost:<port>/swagger-ui.html
 
-
 gRPC contracts defined using .proto files
+
 
 🧠 What I Learned
 
@@ -137,14 +117,12 @@ Choosing synchronous vs asynchronous communication
 
 Dockerizing distributed systems
 
+
 📈 Future Improvements
 
 Kafka retry & dead-letter topics
-
 gRPC contract testing
-
 Distributed tracing
-
 CI/CD pipeline
 
 👨‍💻 Author
@@ -154,7 +132,7 @@ Java Backend Developer | Spring Boot | Microservices | Kafka | gRPC
 
 GitHub: https://github.com/NithishKarth1ck
 
-LinkedIn: (add your LinkedIn link)
+LinkedIn: linkedin.com/in/nithish-karthick-993447355
 
 ⭐ Note
 
