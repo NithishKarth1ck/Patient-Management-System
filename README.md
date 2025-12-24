@@ -154,7 +154,7 @@ Java Backend Developer | Spring Boot | Microservices | Kafka | gRPC
 
 GitHub: https://github.com/NithishKarth1ck
 
-LinkedIn: linkedin.com/in/nithish-karthick-993447355
+LinkedIn: LinkedIn: https://www.linkedin.com/in/nithish-karthick-993447355/
 
 ⭐ Note
 
