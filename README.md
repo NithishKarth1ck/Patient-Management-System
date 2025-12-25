@@ -118,9 +118,12 @@ docker compose up --build
 
 📑 API Documentation
 
-REST APIs:
+## API Documentation
 
-http://localhost:<port>/swagger-ui.html
+This project uses Swagger / OpenAPI for documenting REST APIs.
+Swagger UI is available locally after starting the application:
+
+http://localhost:8080/swagger-ui.html
 
 
 gRPC contracts defined using .proto files
