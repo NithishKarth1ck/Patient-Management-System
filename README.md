@@ -112,8 +112,11 @@ Maven
 Docker & Docker Compose
 
 Steps
+
 git clone https://github.com/NithishKarth1ck/Patient-Management-System.git
+
 cd Patient-Management-System
+
 docker compose up --build
 
 📑 API Documentation
