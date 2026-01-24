@@ -1,6 +1,6 @@
 package com.pm.patientservice.mapper;
 
-import ch.qos.logback.classic.Logger;
+
 import com.pm.patientservice.dto.PatientRequestDTO;
 import com.pm.patientservice.dto.PatientResponseDTO;
 import com.pm.patientservice.model.Patient;
