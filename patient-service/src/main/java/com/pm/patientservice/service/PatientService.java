@@ -41,8 +41,15 @@ public class PatientService {
         }
         Patient newPatient = patientRepository.save(
                 PatientMapper.toModel(patientRequestDTO));
+     //   billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(),
+       //         newPatient.getName(), newPatient.getEmail());
+           try {
         billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(),
                 newPatient.getName(), newPatient.getEmail());
+    } catch (Exception e) {
+        // Log the error but continue
+        System.err.println("Warning: Could not create billing account - " + e.getMessage());
+    }
         kafkaProducer.sendEvent(newPatient);
         return PatientMapper.toDTO(newPatient);
     }
