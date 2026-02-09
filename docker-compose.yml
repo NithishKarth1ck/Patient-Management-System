@@ -86,6 +86,60 @@ services:
     networks:
       - internal
 
+  api-gateway:
+    image: api-gateway
+    container_name: api-gateway
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:4005
+      SPRING_APPLICATION_JSON: '{"auth":{"service":{"url":"http://auth-service:4005"}}}'
+    ports:
+      - "4004:4004"
+    depends_on:
+      - patient-service
+      - auth-service
+    networks:
+      - internal
+
+  
+  auth-db:
+    image: postgres:16
+    container_name: auth-service-db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: authdb
+    ports:
+      - "5001:5432"
+    volumes:
+      - C:/Users/user/Desktop/auth-sql:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d authdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  auth-service:
+    image: auth-service
+    container_name: auth-service
+    depends_on:
+      auth-db:
+        condition: service_healthy      
+    environment:
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/authdb
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+      SPRING_JPA_SHOW_SQL: true
+    ports:
+      - "4005:4005"
+    networks:
+      - "internal"
+
 networks:
   internal:
     driver: bridge

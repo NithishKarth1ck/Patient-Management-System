@@ -14,7 +14,7 @@ public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFact
     private final WebClient webClient;
 
     public JwtValidationGatewayFilterFactory(WebClient.Builder webClientBuilder
-            , @Value("${auth.service.url}")String authServiceUrl) {
+            , @Value("${auth.service.url:http://auth-service:4005}")String authServiceUrl) {
         this.webClient = webClientBuilder.baseUrl(authServiceUrl).build();
     }
 
