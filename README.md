@@ -2,6 +2,8 @@
 
 A event-driven microservices application for patient management, built with Spring Boot and deployed on AWS ECS Fargate.
 
+> 📸 **Screenshots:** All project screenshots are available in the [`screenshots`](./screenshots) folder.
+
 ## 📋 Table of Contents
 
 - [Overview](#overview)
@@ -13,7 +15,6 @@ A event-driven microservices application for patient management, built with Spri
 - [Security](#security)
 - [Getting Started](#getting-started)
 - [Deployment](#deployment)
-- [Screenshots](#screenshots)
 - [Future Enhancements](#future-enhancements)
 
 ## 🎯 Overview
@@ -33,6 +34,37 @@ Internet → ALB → API Gateway → Auth Service → auth-db (PostgreSQL)
                              → Patient Service → patient-db (PostgreSQL)
                                               → Billing Service (gRPC)
                                               → Kafka → Analytics Service
+```
+
+## Architecture
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         Internet                            │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+                    ┌──────▼──────┐
+                    │     ALB     │ (Public)
+                    └──────┬──────┘
+                           │
+                  ┌────────▼────────┐
+                  │  API Gateway    │ (Port 4004)
+                  └────┬───────┬────┘
+                       │       │
+        ┌──────────────┘       └──────────────┐
+        │                                     │
+  ┌─────▼──────┐                       ┌──────▼──────┐
+  │Auth Service│                       │   Patient   │
+  │ (Port 4005)│                       │   Service   │
+  └─────┬──────┘                       │ (Port 4000) │
+        │                              └──────┬──────┘
+  ┌─────▼──────┐                              │
+  │  auth-db   │                      ┌───────┼───────┐
+  │ PostgreSQL │                      │       │       │
+  └────────────┘                ┌─────▼─┐  ┌──▼─── ┐ ┌▼────────┐
+                                │patient│  │Billing│ │Analytics│
+                                │  -db  │  │Service│ │ Service │
+                                │  RDS  │  │(gRPC) │ │ (Kafka) │
+                                └───────┘  └───────┘ └─────────┘
 ```
 
 ### Microservices
