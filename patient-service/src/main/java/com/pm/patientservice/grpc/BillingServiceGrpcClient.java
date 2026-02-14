@@ -7,6 +7,9 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +37,9 @@ public class BillingServiceGrpcClient {
                 BillingRequest.newBuilder().setPatientId(patientId)
                         .setName(name).setEmail(email).build();
 
-        BillingResponse response = blockingStub.createBillingAccount(request);
+        BillingResponse response = blockingStub
+                         .withDeadlineAfter(5, TimeUnit.SECONDS)
+                         .createBillingAccount(request);
         log.info("Received response from billing service via GRPC{}", response);
         return response;
     }

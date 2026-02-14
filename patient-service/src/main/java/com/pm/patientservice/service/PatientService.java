@@ -10,10 +10,13 @@ import com.pm.patientservice.mapper.PatientMapper;
 import com.pm.patientservice.model.Patient;
 import com.pm.patientservice.repository.PatientRepository;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+
 
 
 @Service
@@ -21,6 +24,8 @@ public class PatientService {
     private final PatientRepository patientRepository;
     private final BillingServiceGrpcClient billingServiceGrpcClient;
     private final kafkaProducer kafkaProducer;
+
+    private static final Logger log = LoggerFactory.getLogger(PatientService.class);
 
 
     public PatientService(PatientRepository patientRepository, BillingServiceGrpcClient billingServiceGrpcClient, kafkaProducer kafkaProducer) {
@@ -33,6 +38,14 @@ public class PatientService {
         List<Patient> patients = patientRepository.findAll();
         return patients.stream().map( PatientMapper::toDTO).toList();
 
+    }
+
+    public PatientResponseDTO getPatientById(UUID id){
+            Patient patient = patientRepository.findById(id)
+        .orElseThrow(() -> new PatientNotFoundException("Patient not found with ID: " + id));
+    
+    log.info("Patient retrieved: {}", patient.getId());
+    return PatientMapper.toDTO(patient);
     }
 
     public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO) {
@@ -50,7 +63,15 @@ public class PatientService {
         // Log the error but continue
         System.err.println("Warning: Could not create billing account - " + e.getMessage());
     }
-        kafkaProducer.sendEvent(newPatient);
+    
+//        // kafkaProducer.sendEvent(newPatient);
+//        try {
+//     kafkaProducer.sendEvent(newPatient);
+//     log.warn("Kafka event sent successfully");
+// } catch (Exception e) {
+//     log.warn("Kafka not available, skipping event: {}", e.getMessage());
+//     // Continue without Kafka
+//}
         return PatientMapper.toDTO(newPatient);
     }
 
