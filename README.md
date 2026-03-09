@@ -429,8 +429,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👤 Author
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/NithishKarth1ck)
-- LinkedIn: [Your LinkedIn](linkedin.com/in/nithish-karthick-993447355)
+- GitHub: (https://github.com/NithishKarth1ck)
+- LinkedIn: (linkedin.com/in/nithish-karthick-993447355)
 - Email: Nithishnickzz@gmail.com
 
 ## 🙏 Acknowledgments
