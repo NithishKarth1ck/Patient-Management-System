@@ -379,18 +379,9 @@ docker build -t api-gateway ./api-gateway
 
 ## 🔮 Future Enhancements
 
-- [ ] Implement distributed tracing with AWS X-Ray
-- [ ] Add API rate limiting and throttling
-- [ ] Implement Circuit Breaker pattern with Resilience4j
-- [ ] Add caching layer with Redis
-- [ ] Implement health checks and auto-scaling
-- [ ] Set up CI/CD pipeline with GitHub Actions
-- [ ] Add comprehensive unit and integration tests
-- [ ] Implement API documentation with Swagger/OpenAPI
-- [ ] Add monitoring dashboards with CloudWatch/Grafana
-- [ ] Implement audit logging
-- [ ] Add support for file uploads (patient documents)
-- [ ] Implement notification service (email/SMS)
+-  Add comprehensive unit and integration tests
+-  Implement Circuit Breaker pattern with Resilience4j
+-  Set up CI/CD pipeline with GitHub Actions
 
 ## 📄 License
 
