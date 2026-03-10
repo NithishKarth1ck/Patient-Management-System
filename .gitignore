@@ -9,3 +9,7 @@ integration-test/target/surefire-reports/AuthIntegrationTest.txt
 integration-test/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
 integration-test/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
 infrastructure/target/classes/com/pm/stack/LocalStack.class
+
+
+.idea/
+.vscode/
