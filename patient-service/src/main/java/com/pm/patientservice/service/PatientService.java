@@ -36,7 +36,9 @@ public class PatientService {
 
     public List<PatientResponseDTO> getPatients (){
         List<Patient> patients = patientRepository.findAll();
+         log.info("all patients retrieved");
         return patients.stream().map( PatientMapper::toDTO).toList();
+       
 
     }
 
@@ -56,7 +58,7 @@ public class PatientService {
                 PatientMapper.toModel(patientRequestDTO));
      //   billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(),
     //         newPatient.getName(), newPatient.getEmail());
-           try {
+   try {
         billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(),
                 newPatient.getName(), newPatient.getEmail());
     } catch (Exception e) {
@@ -64,14 +66,14 @@ public class PatientService {
         System.err.println("Warning: Could not create billing account - " + e.getMessage());
     }
     
-//        // kafkaProducer.sendEvent(newPatient);
-//        try {
-//     kafkaProducer.sendEvent(newPatient);
-//     log.warn("Kafka event sent successfully");
-// } catch (Exception e) {
-//     log.warn("Kafka not available, skipping event: {}", e.getMessage());
-//     // Continue without Kafka
-//}
+       // kafkaProducer.sendEvent(newPatient);
+try {
+    kafkaProducer.sendEvent(newPatient);
+    log.warn("Kafka event sent successfully");
+    } 
+catch (Exception e) {
+    log.warn("Kafka not available, skipping event: {}", e.getMessage());
+    }
         return PatientMapper.toDTO(newPatient);
     }
 
@@ -87,10 +89,12 @@ public class PatientService {
         patient.setdateOfBirth(LocalDate.parse(patientRequestDTO.getDateOfBirth()));
 
         Patient updatedPatient = patientRepository.save(patient);
+            log.info("patient details updated");
         return PatientMapper.toDTO(updatedPatient);
     }
 
         public void deletePatient(UUID id) {
         patientRepository.deleteById(id);
+         log.info("patient deleted");
         }
 }
