@@ -1,14 +1,5 @@
-integration-test/target/test-classes/PatientIntegrationTest.class
-infrastructure/target/classes/com/pm/stack/LocalStack.class
-infrastructure/target/classes/com/pm/stack/LocalStack.class
-integration-test/target/test-classes/AuthIntegrationTest.class
-integration-test/target/surefire-reports/TEST-AuthIntegrationTest.xml
-integration-test/target/surefire-reports/TEST-PatientIntegrationTest.xml
-integration-test/target/surefire-reports/PatientIntegrationTest.txt
-integration-test/target/surefire-reports/AuthIntegrationTest.txt
-integration-test/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
-integration-test/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
-infrastructure/target/classes/com/pm/stack/LocalStack.class
+integration-test/target/
+infrastructure/target/
 
 
 .idea/
