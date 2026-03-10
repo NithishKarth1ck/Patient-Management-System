@@ -29,43 +29,13 @@ A scalable microservices-based patient management system demonstrating modern cl
 ## 🏗️ Architecture
 
 ### High-Level Architecture
-```
-Internet → ALB → API Gateway → Auth Service → auth-db (PostgreSQL)
-                             → Patient Service → patient-db (PostgreSQL)
-                                              → Billing Service (gRPC)
-                                              → Kafka → Analytics Service
-```
+
+<img width="1251" height="501" alt="architecture-diagram drawio" src="https://github.com/user-attachments/assets/f87c2acb-9947-47d1-bc4f-7cfc96154150" />
+
 
 ## Architecture
-```
-┌─────────────────────────────────────────────────────────────┐
-│                         Internet                            │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                    ┌──────▼──────┐
-                    │     ALB     │ (Public)
-                    └──────┬──────┘
-                           │
-                  ┌────────▼────────┐
-                  │  API Gateway    │ (Port 4004)
-                  └────┬───────┬────┘
-                       │       │
-        ┌──────────────┘       └──────────────┐
-        │                                     │
-  ┌─────▼──────┐                       ┌──────▼──────┐
-  │Auth Service│                       │   Patient   │
-  │ (Port 4005)│                       │   Service   │
-  └─────┬──────┘                       │ (Port 4000) │
-        │                              └──────┬──────┘
-  ┌─────▼──────┐                              │
-  │  auth-db   │                      ┌───────┼───────┐
-  │ PostgreSQL │                      │       │       │
-  └────────────┘                ┌─────▼─┐  ┌──▼─── ┐ ┌▼────────┐
-                                │patient│  │Billing│ │Analytics│
-                                │  -db  │  │Service│ │ Service │
-                                │  RDS  │  │(gRPC) │ │ (Kafka) │
-                                └───────┘  └───────┘ └─────────┘
-```
+<img width="881" height="581" alt="architecture-diagram (1) drawio" src="https://github.com/user-attachments/assets/0c717666-70e6-440a-a1af-0008908e9cb5" />
+
 
 ### Microservices
 
