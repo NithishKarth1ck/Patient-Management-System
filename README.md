@@ -29,43 +29,13 @@ A scalable microservices-based patient management system demonstrating modern cl
 ## 🏗️ Architecture
 
 ### High-Level Architecture
-```
-Internet → ALB → API Gateway → Auth Service → auth-db (PostgreSQL)
-                             → Patient Service → patient-db (PostgreSQL)
-                                              → Billing Service (gRPC)
-                                              → Kafka → Analytics Service
-```
+
+<img width="1251" height="501" alt="architecture-diagram drawio" src="https://github.com/user-attachments/assets/f87c2acb-9947-47d1-bc4f-7cfc96154150" />
+
 
 ## Architecture
-```
-┌─────────────────────────────────────────────────────────────┐
-│                         Internet                            │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                    ┌──────▼──────┐
-                    │     ALB     │ (Public)
-                    └──────┬──────┘
-                           │
-                  ┌────────▼────────┐
-                  │  API Gateway    │ (Port 4004)
-                  └────┬───────┬────┘
-                       │       │
-        ┌──────────────┘       └──────────────┐
-        │                                     │
-  ┌─────▼──────┐                       ┌──────▼──────┐
-  │Auth Service│                       │   Patient   │
-  │ (Port 4005)│                       │   Service   │
-  └─────┬──────┘                       │ (Port 4000) │
-        │                              └──────┬──────┘
-  ┌─────▼──────┐                              │
-  │  auth-db   │                      ┌───────┼───────┐
-  │ PostgreSQL │                      │       │       │
-  └────────────┘                ┌─────▼─┐  ┌──▼─── ┐ ┌▼────────┐
-                                │patient│  │Billing│ │Analytics│
-                                │  -db  │  │Service│ │ Service │
-                                │  RDS  │  │(gRPC) │ │ (Kafka) │
-                                └───────┘  └───────┘ └─────────┘
-```
+<img width="881" height="581" alt="architecture-diagram (1) drawio" src="https://github.com/user-attachments/assets/0c717666-70e6-440a-a1af-0008908e9cb5" />
+
 
 ### Microservices
 
@@ -196,7 +166,7 @@ VPC (10.0.0.0/16)
 
 #### Register User
 ```bash
-POST http://your-alb-url.amazonaws.com/auth/register
+POST http://localhost:4005/auth/register
 Content-Type: application/json
 
 {
@@ -208,7 +178,7 @@ Content-Type: application/json
 
 #### Login
 ```bash
-POST http://your-alb-url.amazonaws.com/auth/login
+POST http://localhost:4005/auth/login
 Content-Type: application/json
 
 {
@@ -224,7 +194,7 @@ Response:
 
 #### Create Patient
 ```bash
-POST http://your-alb-url.amazonaws.com/api/patients
+POST http://localhost:4004/api/patients
 Authorization: Bearer {your-jwt-token}
 Content-Type: application/json
 
@@ -273,7 +243,7 @@ Content-Type: application/json
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/patient-management-system.git
+git clone https://github.com/NithishKarth1ck/patient-management-system.git
 cd patient-management-system
 ```
 
@@ -382,45 +352,47 @@ docker build -t analytics-service ./analytics-service
 docker build -t api-gateway ./api-gateway
 ```
 
-## 🎓 Key Learnings
+## 🏛️ Design Decisions
 
-### Microservices Patterns
-- Implemented **Database per Service** pattern for data isolation
-- Used **API Gateway** pattern for centralized authentication and routing
-- Applied **Service Discovery** for dynamic service communication
-- Demonstrated **Event-Driven Architecture** with Kafka
+### Why gRPC for Patient → Billing Communication?
+Billing account creation is a synchronous operation that must complete 
+before returning a response to the client — the patient record is only 
+valid once a billing account exists. gRPC was chosen over REST here 
+because Protocol Buffers provide strongly-typed contracts between services 
+and lower serialization overhead compared to JSON, which matters for 
+frequent internal service calls.
 
-### Cloud Native
-- Deployed containerized applications on **AWS ECS Fargate**
-- Configured **private networking** with VPC and security groups
-- Used **managed services** (RDS, ALB, Cloud Map) for operational efficiency
-- Implemented **infrastructure as code** with AWS Copilot
+### Why Kafka for Patient → Analytics Communication?
+Analytics processing doesn't need to block patient creation. If the 
+analytics service is slow or temporarily down, the patient operation 
+should still succeed. Kafka decouples these services — patient-service 
+publishes an event and moves on, analytics-service consumes at its own 
+pace. This also makes the analytics pipeline independently scalable.
 
-### Inter-Service Communication
-- **Synchronous**: REST APIs for client-facing operations
-- **Synchronous**: gRPC for high-performance service-to-service calls
-- **Asynchronous**: Kafka for event streaming and decoupling
+### Why ECS Fargate over ECS EC2?
+Fargate eliminates the need to manage EC2 instance sizing, patching, and 
+capacity planning — the right tradeoff for a project where operational 
+simplicity matters more than cost optimization at scale. EC2 launch type 
+would be preferable in production with predictable high-traffic workloads.
 
-### Security Best Practices
-- JWT-based stateless authentication
-- BCrypt password hashing
-- Private subnets for backend services
-- Security groups for network-level access control
+### Why Database per Service?
+Each service owns its schema with no shared tables. This means 
+auth-service and patient-service can evolve their schemas independently 
+without coordinating migrations, and a schema change in one service 
+cannot break another — a core principle of microservice autonomy.
+
+### Why JWT validation at the API Gateway?
+Centralizing auth validation at the gateway means downstream services 
+(patient-service, billing-service) don't need to implement or maintain 
+auth logic independently. A single point of enforcement also means 
+rotating JWT secrets or changing validation logic requires changes in 
+one place only.
 
 ## 🔮 Future Enhancements
 
-- [ ] Implement distributed tracing with AWS X-Ray
-- [ ] Add API rate limiting and throttling
-- [ ] Implement Circuit Breaker pattern with Resilience4j
-- [ ] Add caching layer with Redis
-- [ ] Implement health checks and auto-scaling
-- [ ] Set up CI/CD pipeline with GitHub Actions
-- [ ] Add comprehensive unit and integration tests
-- [ ] Implement API documentation with Swagger/OpenAPI
-- [ ] Add monitoring dashboards with CloudWatch/Grafana
-- [ ] Implement audit logging
-- [ ] Add support for file uploads (patient documents)
-- [ ] Implement notification service (email/SMS)
+-  Add comprehensive unit and integration tests
+-  Implement Circuit Breaker pattern with Resilience4j
+-  Set up CI/CD pipeline with GitHub Actions
 
 ## 📄 License
 
@@ -428,17 +400,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👤 Author
 
-**Your Name**
-- GitHub: [@yourusername](https://github.com/NithishKarth1ck)
-- LinkedIn: [Your LinkedIn](linkedin.com/in/nithish-karthick-993447355)
-- Email: Nithishnickzz@gmail.com
-
-## 🙏 Acknowledgments
-
-- Spring Boot documentation
-- AWS documentation and tutorials
-- gRPC Java documentation
-- Apache Kafka documentation
+**Nithish Karthick**
+- GitHub: [@NithishKarth1ck](https://github.com/NithishKarth1ck)
+- LinkedIn: [Nithish Karthick](https://www.linkedin.com/in/nithish-karthick-993447355)
+- Email: nithishnickzz@gmail.com
 
 ---
 
@@ -449,6 +414,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ```
 MIT License
 
-Copyright (c) 2026 Your Name
+Copyright (c) 2026 Nithish Karthick
 
 Permission is hereby granted, free of charge, to any person obtaining a copy...
