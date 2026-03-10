@@ -1,6 +1,10 @@
 integration-test/target/
-infrastructure/target/
-
-
+analytics-service/target
+patient-service/target
+billing-service/target
+auth-service/target
+api-gateway/target
+grpc-requests/
+api-requests/
 .idea/
 .vscode/
