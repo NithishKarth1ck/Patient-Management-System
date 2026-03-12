@@ -15,7 +15,7 @@ A event-driven microservices application for patient management, built with Spri
 - [Security](#security)
 - [Getting Started](#getting-started)
 - [Deployment](#deployment)
-- [Design Decesions](#design-decisions)
+- [Design Decisions](#design-decisions)
 - [Future Enhancements](#future-enhancements)
 
 ## 🎯 Overview
