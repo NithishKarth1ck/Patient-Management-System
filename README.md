@@ -15,7 +15,7 @@ A event-driven microservices application for patient management, built with Spri
 - [Security](#security)
 - [Getting Started](#getting-started)
 - [Deployment](#deployment)
-- [Design Decesions](#design-decisions)
+- [Design Decisions](#design-decisions)
 - [Future Enhancements](#future-enhancements)
 
 ## 🎯 Overview
@@ -244,8 +244,8 @@ Content-Type: application/json
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/NithishKarth1ck/patient-management-system.git
-cd patient-management-system
+git clone https://github.com/NithishKarth1ck/Patient-Management-System.git
+cd Patient-Management-System
 ```
 
 2. **Start infrastructure services**
@@ -397,7 +397,7 @@ one place only.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ## 👤 Author
 
@@ -409,12 +409,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **⭐ If you found this project helpful, please consider giving it a star!**
-```
-
-### `LICENSE` (MIT License)
-```
-MIT License
-
-Copyright (c) 2026 Nithish Karthick
-
-Permission is hereby granted, free of charge, to any person obtaining a copy...
