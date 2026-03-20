@@ -1,6 +1,5 @@
 package com.pm.billingservice.service;
 
-import com.google.api.Billing;
 import com.pm.billingservice.Repository.BillingRepository;
 import com.pm.billingservice.enums.AccountStatus;
 import com.pm.billingservice.model.BillingAccount;
@@ -47,8 +46,14 @@ public class BillingService {
     account.setStatus(AccountStatus.ACTIVE);
     account.setCreatedAt(LocalDateTime.now());
 
-    billingRepository.save(account); 
+    BillingAccount saved = billingRepository.save(account);
     
+    log.info("Billing account created: {} for patientId: {}",
+            saved.getId(),saved.getPatientId());
     
+    return BillingResponse.newBuilder()
+           .setAccountId(saved.getId().toString())
+           .setStatus(saved.getStatus().toString())
+           .build();
     }
 }

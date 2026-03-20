@@ -11,7 +11,7 @@ import jakarta.persistence.*;
 @Table(name = "billing_account")
 public class BillingAccount {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
