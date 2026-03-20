@@ -1,6 +1,9 @@
 package com.pm.billingservice.model;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
+
+import com.pm.billingservice.enums.AccountStatus;
 
 import jakarta.persistence.*;
 
@@ -20,7 +23,13 @@ public class BillingAccount {
     @Column(nullable = false ,unique = true)
     private String email;
 
-    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AccountStatus status;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
     public UUID getId() {
         return this.id;
     }
@@ -29,7 +38,7 @@ public class BillingAccount {
         this.id = id;
     }
 
-        public String getPatientId() {
+    public String getPatientId() {
         return this.patientId;
     }
 
@@ -51,6 +60,22 @@ public class BillingAccount {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public AccountStatus getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(AccountStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return this.createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
 }
