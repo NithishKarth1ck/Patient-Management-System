@@ -77,12 +77,31 @@ services:
       - internal
     restart: unless-stopped
 
+  billing-db:
+    image: postgres:16
+    container_name: billing-db
+    environment:
+      POSTGRES_DB: billingdb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5434:5432"
+    networks:
+      - internal
+
   billing-service:
     image: billing-service
     container_name: billing-service
     ports:
       - "4001:4001"
       - "9001:9001"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://billing-db:5432/billingdb
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+    depends_on:
+      - billing-db
     networks:
       - internal
 
