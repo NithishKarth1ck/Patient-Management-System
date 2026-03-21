@@ -1,12 +1,17 @@
+#Build folders
 integration-test/target/
 analytics-service/target
 patient-service/target
 billing-service/target
 auth-service/target
 api-gateway/target
+
+#gRPC requests
 grpc-requests/
 api-requests/
+
+#IDE files
 .idea/
 .vscode/
 /.idea/
-/.idea/
+
