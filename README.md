@@ -4,6 +4,7 @@ A event-driven microservices application for patient management, built with Spri
 
 > 📸 **Screenshots:** All project screenshots are available in the [`screenshots`](./screenshots) folder.
 
+![Tests](https://github.com/NithishKarth1ck/Patient-Management-System/actions/workflows/test.yml/badge.svg)
 ## 📋 Table of Contents
 
 - [Overview](#overview)
@@ -73,7 +74,7 @@ A scalable microservices-based patient management system demonstrating modern cl
 -  Private networking with VPC
 -  Managed databases with AWS RDS
 -  Service discovery with AWS Cloud Map
-
+- Automated test suite with 52 test cases validated via GitHub Actions CI
 ## 🛠️ Technologies
 
 ### Backend
@@ -390,10 +391,9 @@ rotating JWT secrets or changing validation logic requires changes in
 one place only.
 
 ## 🔮 Future Enhancements
-
--  Add comprehensive unit and integration tests
 -  Implement Circuit Breaker pattern with Resilience4j
--  Set up CI/CD pipeline with GitHub Actions
+- Extend GitHub Actions workflow to cover all service test suites
+- Add distributed tracing with OpenTelemetry
 
 ## 📄 License
 
