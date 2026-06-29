@@ -24,3 +24,7 @@ jobs:
       - name: Run PatientRepositoryTest
         working-directory: patient-service
         run: mvn test -Dtest=PatientRepositoryTest
+
+      - name: Run all tests
+        working-directory: patient-service
+        run: mvn test
