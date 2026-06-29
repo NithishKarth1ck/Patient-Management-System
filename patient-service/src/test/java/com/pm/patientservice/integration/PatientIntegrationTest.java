@@ -1,4 +1,4 @@
-package com.pm.patientservice;
+package com.pm.patientservice.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pm.patientservice.dto.PatientRequestDTO;
