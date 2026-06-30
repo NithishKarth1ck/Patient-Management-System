@@ -56,20 +56,17 @@ public class PatientService {
         }
         Patient newPatient = patientRepository.save(
                 PatientMapper.toModel(patientRequestDTO));
-     //   billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(),
-    //         newPatient.getName(), newPatient.getEmail());
    try {
         billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(),
                 newPatient.getName(), newPatient.getEmail());
     } catch (Exception e) {
         // Log the error but continue
-        System.err.println("Warning: Could not create billing account - " + e.getMessage());
+       log.error("Could not create billing account: {}", e.getMessage());
     }
     
-       // kafkaProducer.sendEvent(newPatient);
 try {
     kafkaProducer.sendEvent(newPatient);
-    log.warn("Kafka event sent successfully");
+    log.info("Kafka event sent successfully");
     } 
 catch (Exception e) {
     log.warn("Kafka not available, skipping event: {}", e.getMessage());
