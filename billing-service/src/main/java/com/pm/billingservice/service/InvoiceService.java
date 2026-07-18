@@ -7,6 +7,7 @@ import com.pm.billingservice.model.BillingAccount;
 import com.pm.billingservice.model.Invoice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -37,7 +38,6 @@ public class InvoiceService {
              invoice.setAmount(amount);
              invoice.setDueDate(dueDate);
              invoice.setDescription(description);
-             invoice.setCreatedAt(LocalDateTime.now());
              invoice.setStatus(InvoiceStatus.PENDING);
 
              Invoice saved = invoiceRepository.save(invoice);
@@ -45,7 +45,13 @@ public class InvoiceService {
              log.info("Invoice created: {} for billingAccountId: {}",saved.getId(),billingAccountId);
     }
 
+    @Scheduled(cron = "0 0 0 * * *")
     public void markOverdueInvoices(){
-
+    int update = invoiceRepository.updateOverdueInvoices(
+            InvoiceStatus.OVERDUE,
+            InvoiceStatus.PENDING,
+            LocalDateTime.now()
+    );
+    log.info("Marked {} invoices as OVERDUE", update);
     }
 }
