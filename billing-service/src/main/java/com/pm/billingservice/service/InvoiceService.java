@@ -1,7 +1,7 @@
 package com.pm.billingservice.service;
 
-import com.pm.billingservice.Repository.BillingRepository;
-import com.pm.billingservice.Repository.InvoiceRepository;
+import com.pm.billingservice.repository.BillingRepository;
+import com.pm.billingservice.repository.InvoiceRepository;
 import com.pm.billingservice.enums.InvoiceStatus;
 import com.pm.billingservice.model.BillingAccount;
 import com.pm.billingservice.model.Invoice;

@@ -1,4 +1,4 @@
-package com.pm.billingservice.Repository;
+package com.pm.billingservice.repository;
 
 import com.pm.billingservice.enums.AccountStatus;
 import com.pm.billingservice.enums.InvoiceStatus;

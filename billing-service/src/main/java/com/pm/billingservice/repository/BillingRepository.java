@@ -1,4 +1,4 @@
-package com.pm.billingservice.Repository;
+package com.pm.billingservice.repository;
 
 import java.util.Optional;
 import java.util.UUID;

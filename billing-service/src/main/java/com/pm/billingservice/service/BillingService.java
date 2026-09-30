@@ -1,6 +1,6 @@
 package com.pm.billingservice.service;
 
-import com.pm.billingservice.Repository.BillingRepository;
+import com.pm.billingservice.repository.BillingRepository;
 import com.pm.billingservice.enums.AccountStatus;
 import com.pm.billingservice.model.BillingAccount;
 
@@ -18,9 +18,11 @@ public class BillingService {
     
     private static final Logger log = LoggerFactory.getLogger(BillingService.class);
     private final BillingRepository billingRepository;
+    private final InvoiceService invoiceService;
 
-    public BillingService(BillingRepository billingRepository) {
+    public BillingService(BillingRepository billingRepository, InvoiceService invoiceService) {
         this.billingRepository = billingRepository;
+        this.invoiceService = invoiceService;
     }
     
     public BillingResponse createBillingAccount(BillingRequest request){

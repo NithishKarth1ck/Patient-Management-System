@@ -38,8 +38,6 @@ public class PatientService {
         List<Patient> patients = patientRepository.findAll();
          log.info("all patients retrieved");
         return patients.stream().map( PatientMapper::toDTO).toList();
-       
-
     }
 
     public PatientResponseDTO getPatientById(UUID id){
