@@ -1,0 +1,48 @@
+.title {
+  color: #222;
+  font-size: 32px;
+  padding: 16px;
+  border: 1px solid gray;
+  margin-bottom: 20px;
+}
+
+.card{
+  background-color: white;
+  color: #222;
+  padding: 16px;
+  border: 1px solid gray;
+  border-radius: 8%;
+  margin-bottom: 16px;
+}
+
+.cards{
+  display: flex;
+  gap: 16px;
+}
+
+.table th,
+.table td{
+  padding: 16px;
+  border: 1px solid gray;
+  color: #222;
+}
+
+.table{
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.container{
+  background-color: lightgrey;
+  padding: 24px;
+  min-height: 100vh;
+}
+
+.card h2,
+.card p {
+  color: #222;
+}
+
+.container > div:first-child p {
+  color: #222;
+}
