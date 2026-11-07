@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getPatients } from "./patientAPI";
+import { getPatients } from "../../lib/patientAPI";
 
 export default function PatientList({ url }) {
   const [patients, setPatients] = useState([]);
