@@ -3,11 +3,16 @@ export async function apiRequest(url, options = {}) {
     method = "GET",
     headers = {},
     body,
-    signal
+    signal,
+    token
   } = options;
 
   const requestHeaders = { ...headers };
 
+  if(token){
+    requestHeaders["Authorization"] = `Bearer ${token}`;
+  }
+    
   if (body !== undefined) {
     requestHeaders["Content-Type"] = "application/json";
   }
