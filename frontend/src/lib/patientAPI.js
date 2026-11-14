@@ -1,3 +1,4 @@
+
 export async function apiRequest(url, options = {}) {
   const {
     method = "GET",
@@ -9,10 +10,10 @@ export async function apiRequest(url, options = {}) {
 
   const requestHeaders = { ...headers };
 
-  if(token){
+  if (token) {
     requestHeaders["Authorization"] = `Bearer ${token}`;
   }
-    
+
   if (body !== undefined) {
     requestHeaders["Content-Type"] = "application/json";
   }
@@ -25,7 +26,29 @@ export async function apiRequest(url, options = {}) {
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status: ${response.status}`);
+    let errorMessage = `Request failed with status: ${response.status}`;
+
+    try {
+      const responseText = await response.text();
+
+      if (responseText) {
+        try {
+          const errorData = JSON.parse(responseText);
+
+          errorMessage =
+            errorData.message ||
+            errorData.error ||
+            errorData.detail ||
+            responseText;
+        } catch {
+          errorMessage = responseText;
+        }
+      }
+    } catch {
+      // Keep the status-based fallback message.
+    }
+
+    throw new Error(errorMessage);
   }
 
   if (response.status === 204) {

@@ -1,111 +1,187 @@
+
 "use client";
-import { useState } from "react";
 
-function PatientRegistration() {
+import { useEffect, useState } from "react";
+import { apiRequest } from "@/lib/patientAPI";
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+function PatientRegistration({ onPatientSaved, selectedPatient }) {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [submittedPatient, setSubmittedPatient] = useState(null);
-  const [firstNameError, setFirstNameError] = useState("");
-  const [lastNameError, setLastNameError] = useState("");
+  const [address, setAddress] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [registeredDate, setRegisteredDate] = useState("");
 
-  function handleSubmit(event) {
+  useEffect(() => {
+  if (selectedPatient) {
+    setName(selectedPatient.name);
+    setEmail(selectedPatient.email);
+    setAddress(selectedPatient.address);
+    setDateOfBirth(selectedPatient.dateOfBirth);
+  } else {
+    setName("");
+    setEmail("");
+    setAddress("");
+    setDateOfBirth("");
+    setRegisteredDate("");
+    setErrors({});
+    setErrorMessage("");
+  }
+}, [selectedPatient]);
+
+  const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  async function handleSubmit(event) {
     event.preventDefault();
 
-    if (firstName.trim() === "") {
-  setFirstNameError("First Name is required");
-} else {
-  setFirstNameError("");
-}
+    setErrors({});
+    setSuccessMessage("");
+    setErrorMessage("");
 
-    if (lastName.trim() === "") {
-  setLastNameError("Last Name is required");
-} else {
-  setLastNameError("");
-}
+    // Validate required fields
+    const newErrors = {};
 
-   if( firstName.trim() === ""||lastName.trim() === "" ){
-    return;
-   }
+    if (!name.trim()) newErrors.name = "Name is required";
+    if (!email.trim()) newErrors.email = "Email is required";
+    if (!address.trim()) newErrors.address = "Address is required";
+    if (!dateOfBirth) newErrors.dateOfBirth = "Date of birth is required";
+    if (!selectedPatient &&!registeredDate) newErrors.registeredDate = "Registered date is required";
 
-    setSubmittedPatient({
-  firstName,
-  lastName,
-  email,
-  phone
-});
-    console.log(
-      firstName,
-      lastName,
-      email,
-      phone
-    );
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    // Get authentication token
+    const token = sessionStorage.getItem("token");
+
+    if (!token) {
+      setErrorMessage("Please log in before registering a patient.");
+      return;
+    }
+
+    // Prepare backend request data
+    const patientData = {
+      name: name.trim(),
+      email: email.trim(),
+      address: address.trim(),
+      dateOfBirth,
+      ...(!selectedPatient&&{registeredDate})
+    };
+
+    const url = selectedPatient
+                ?`http://localhost:4004/api/patients/${selectedPatient.id}`
+                :"http://localhost:4004/api/patients";
+
+    const method = selectedPatient ? "PUT" : "POST";
+    
+    
+    try {
+      setSubmitting(true);
+
+      await apiRequest(url,
+        {
+          method,
+          token,
+          body: patientData
+        }
+      );
+
+      setSuccessMessage(
+        selectedPatient 
+        ?"Patient updated successfully!"
+        :"Patient registered successfully!"
+      );
+
+      // Clear form after successful creation
+      setName("");
+      setEmail("");
+      setAddress("");
+      setDateOfBirth("");
+      setRegisteredDate("");
+
+      // Notify parent to refresh patient list
+      onPatientSaved?.();
+
+    } catch (error) {
+      setErrorMessage(
+        error.message || "Unable to register patient."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
+
   return (
-    <>
-   <form onSubmit={handleSubmit}>
-      <h1>Patient Registration</h1>
-      <p>Register a new patient here.</p>
+    <form onSubmit={handleSubmit}>
+      <h2>{selectedPatient ? "Edit Patient" : "Register New Patient"}</h2>
 
-      <label htmlFor="firstName">First Name</label>
+      {successMessage && <p>{successMessage}</p>}
+      {errorMessage && <p>{errorMessage}</p>}
+
+      <label htmlFor="name">Name</label>
       <input
-      type="text"
-      id="firstName"
-      name="firstName"
-      value={firstName}
-      onChange={(event) => {setFirstName(event.target.value); setFirstNameError("");}}
+        id="name"
+        type="text"
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+        required
       />
-      {firstNameError && <p>{firstNameError}</p>}
+      {errors.name && <p>{errors.name}</p>}
 
-      <label>Last Name</label>
+      <label htmlFor="email">Email</label>
       <input
-      type="text"
-      id="lastName"
-      name="lastName"
-      value={lastName}
-      onChange={(event) => {setLastName(event.target.value); setLastNameError("");}}
+        id="email"
+        type="email"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+        required
       />
-      {lastNameError && <p>{lastNameError}</p>}
+      {errors.email && <p>{errors.email}</p>}
 
-
-      <label>Email</label>
-      <input 
-      type="email"
-      id="email"
-      name="email"
-      value={email}
-      onChange={(event) => setEmail(event.target.value)}   
-      required  
-      />
-
-      <label>Phone</label>
+      <label htmlFor="address">Address</label>
       <input
-      type="tel"
-      id="phone"
-      name="phone"
-      value={phone}
-      onChange={(event) => setPhone(event.target.value)}
+        id="address"
+        type="text"
+        value={address}
+        onChange={(event) => setAddress(event.target.value)}
+        required
       />
-      <p>First name: {firstName}</p>
-      <button type="submit" >Register Patient</button>
+      {errors.address && <p>{errors.address}</p>}
 
-   </form> 
-   {submittedPatient && (
-  <div>
-    <h2>Submitted Patient Information</h2>
+      <label htmlFor="dateOfBirth">Date of Birth</label>
+      <input
+        id="dateOfBirth"
+        type="date"
+        value={dateOfBirth}
+        onChange={(event) => setDateOfBirth(event.target.value)}
+        required
+      />
+      {errors.dateOfBirth && <p>{errors.dateOfBirth}</p>}
 
-    <p>First Name: {submittedPatient.firstName}</p>
-    <p>Last Name: {submittedPatient.lastName}</p>
-    <p>Email: {submittedPatient.email}</p>
-    <p>Phone: {submittedPatient.phone}</p>
-  </div>
+{!selectedPatient && (
+  <>
+    <label htmlFor="registeredDate">Registered Date</label>
+    <input
+      id="registeredDate"
+      type="date"
+      value={registeredDate}
+      onChange={(event) => setRegisteredDate(event.target.value)}
+      required
+    />
+    {errors.registeredDate && <p>{errors.registeredDate}</p>}
+  </>
 )}
-   </>
+
+<button type="submit" disabled={submitting}>
+  {submitting
+    ? selectedPatient ? "Updating..." : "Registering..."
+    : selectedPatient ? "Update Patient" : "Register Patient"}
+</button>
+    </form>
   );
 }
-
-
 
 export default PatientRegistration;
