@@ -4,15 +4,28 @@
 import { useEffect, useState } from "react";
 import { apiRequest } from "@/lib/patientAPI";
 
-function PatientRegistration({ onPatientSaved, selectedPatient }) {
+function PatientRegistration({
+  onPatientSaved,
+  onCancelEdit,
+  selectedPatient
+}) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [registeredDate, setRegisteredDate] = useState("");
 
-  useEffect(() => {
+  const [submitting, setSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Populate the form when editing.
+  // Reset it when returning to creation mode.
+useEffect(() => {
+  setErrorMessage("");
+
   if (selectedPatient) {
+    setSuccessMessage("");
     setName(selectedPatient.name);
     setEmail(selectedPatient.email);
     setAddress(selectedPatient.address);
@@ -23,36 +36,14 @@ function PatientRegistration({ onPatientSaved, selectedPatient }) {
     setAddress("");
     setDateOfBirth("");
     setRegisteredDate("");
-    setErrors({});
-    setErrorMessage("");
   }
 }, [selectedPatient]);
-
-  const [errors, setErrors] = useState({});
-  const [submitting, setSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(event) {
     event.preventDefault();
 
-    setErrors({});
     setSuccessMessage("");
     setErrorMessage("");
-
-    // Validate required fields
-    const newErrors = {};
-
-    if (!name.trim()) newErrors.name = "Name is required";
-    if (!email.trim()) newErrors.email = "Email is required";
-    if (!address.trim()) newErrors.address = "Address is required";
-    if (!dateOfBirth) newErrors.dateOfBirth = "Date of birth is required";
-    if (!selectedPatient &&!registeredDate) newErrors.registeredDate = "Registered date is required";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
 
     // Get authentication token
     const token = sessionStorage.getItem("token");
@@ -62,52 +53,46 @@ function PatientRegistration({ onPatientSaved, selectedPatient }) {
       return;
     }
 
-    // Prepare backend request data
+    // Prepare request data
     const patientData = {
       name: name.trim(),
       email: email.trim(),
       address: address.trim(),
       dateOfBirth,
-      ...(!selectedPatient&&{registeredDate})
+      ...(!selectedPatient && { registeredDate })
     };
 
-    const url = selectedPatient
-                ?`http://localhost:4004/api/patients/${selectedPatient.id}`
-                :"http://localhost:4004/api/patients";
+    // Select URL and HTTP method based on the operation
+const url = selectedPatient
+  ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/patients/${selectedPatient.id}`
+  : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/patients`;
 
     const method = selectedPatient ? "PUT" : "POST";
-    
-    
+
     try {
       setSubmitting(true);
 
-      await apiRequest(url,
-        {
-          method,
-          token,
-          body: patientData
-        }
-      );
+      await apiRequest(url, {
+        method,
+        token,
+        body: patientData
+      });
 
       setSuccessMessage(
-        selectedPatient 
-        ?"Patient updated successfully!"
-        :"Patient registered successfully!"
+        selectedPatient
+          ? "Patient updated successfully!"
+          : "Patient registered successfully!"
       );
 
-      // Clear form after successful creation
-      setName("");
-      setEmail("");
-      setAddress("");
-      setDateOfBirth("");
-      setRegisteredDate("");
-
-      // Notify parent to refresh patient list
+      // Notify the parent after a successful request
       onPatientSaved?.();
 
     } catch (error) {
       setErrorMessage(
-        error.message || "Unable to register patient."
+        error.message ||
+          (selectedPatient
+            ? "Unable to update patient."
+            : "Unable to register patient.")
       );
     } finally {
       setSubmitting(false);
@@ -116,7 +101,11 @@ function PatientRegistration({ onPatientSaved, selectedPatient }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>{selectedPatient ? "Edit Patient" : "Register New Patient"}</h2>
+      <h2>
+        {selectedPatient
+          ? "Edit Patient"
+          : "Register New Patient"}
+      </h2>
 
       {successMessage && <p>{successMessage}</p>}
       {errorMessage && <p>{errorMessage}</p>}
@@ -129,7 +118,6 @@ function PatientRegistration({ onPatientSaved, selectedPatient }) {
         onChange={(event) => setName(event.target.value)}
         required
       />
-      {errors.name && <p>{errors.name}</p>}
 
       <label htmlFor="email">Email</label>
       <input
@@ -139,7 +127,6 @@ function PatientRegistration({ onPatientSaved, selectedPatient }) {
         onChange={(event) => setEmail(event.target.value)}
         required
       />
-      {errors.email && <p>{errors.email}</p>}
 
       <label htmlFor="address">Address</label>
       <input
@@ -149,7 +136,6 @@ function PatientRegistration({ onPatientSaved, selectedPatient }) {
         onChange={(event) => setAddress(event.target.value)}
         required
       />
-      {errors.address && <p>{errors.address}</p>}
 
       <label htmlFor="dateOfBirth">Date of Birth</label>
       <input
@@ -159,27 +145,39 @@ function PatientRegistration({ onPatientSaved, selectedPatient }) {
         onChange={(event) => setDateOfBirth(event.target.value)}
         required
       />
-      {errors.dateOfBirth && <p>{errors.dateOfBirth}</p>}
 
-{!selectedPatient && (
-  <>
-    <label htmlFor="registeredDate">Registered Date</label>
-    <input
-      id="registeredDate"
-      type="date"
-      value={registeredDate}
-      onChange={(event) => setRegisteredDate(event.target.value)}
-      required
-    />
-    {errors.registeredDate && <p>{errors.registeredDate}</p>}
-  </>
-)}
+      {!selectedPatient && (
+        <>
+          <label htmlFor="registeredDate">Registered Date</label>
+          <input
+            id="registeredDate"
+            type="date"
+            value={registeredDate}
+            onChange={(event) => setRegisteredDate(event.target.value)}
+            required
+          />
+        </>
+      )}
 
-<button type="submit" disabled={submitting}>
-  {submitting
-    ? selectedPatient ? "Updating..." : "Registering..."
-    : selectedPatient ? "Update Patient" : "Register Patient"}
-</button>
+      <button type="submit" disabled={submitting}>
+        {submitting
+          ? selectedPatient
+            ? "Updating..."
+            : "Registering..."
+          : selectedPatient
+            ? "Update Patient"
+            : "Register Patient"}
+      </button>
+
+      {selectedPatient && (
+        <button
+          type="button"
+          onClick={onCancelEdit}
+          disabled={submitting}
+        >
+          Cancel Edit
+        </button>
+      )}
     </form>
   );
 }
