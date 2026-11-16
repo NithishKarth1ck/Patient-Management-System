@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiRequest } from "@/lib/patientAPI";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -72,6 +73,10 @@ export default function LoginPage() {
           <button type="submit" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
+
+          <p>
+             Don't have an account? <Link href="/register">Register</Link>
+          </p>
 
           {error && <p className="error" role="alert">{error}</p>}
         </form>

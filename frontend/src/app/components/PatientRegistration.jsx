@@ -84,6 +84,14 @@ const url = selectedPatient
           : "Patient registered successfully!"
       );
 
+      if (!selectedPatient) {
+        setName("");
+        setEmail("");
+        setAddress("");
+        setDateOfBirth("");
+        setRegisteredDate("");
+      }
+
       // Notify the parent after a successful request
       onPatientSaved?.();
 
@@ -179,7 +187,7 @@ const url = selectedPatient
         </button>
       )}
     </form>
-  );
+    );
 }
 
 export default PatientRegistration;
