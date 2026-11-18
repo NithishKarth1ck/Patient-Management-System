@@ -209,6 +209,7 @@ export default function Home() {
                 <tr>
                   <th>Name</th>
                   <th>Email</th>
+                  <th>Phone</th>
                   <th>Address</th>
                   <th>Date of Birth</th>
                   <th>Actions</th>
@@ -220,6 +221,7 @@ export default function Home() {
                   <tr key={patient.id}>
                     <td>{patient.name}</td>
                     <td>{patient.email}</td>
+                    <td>{patient.phone}</td>
                     <td>{patient.address}</td>
                     <td>{patient.dateOfBirth}</td>
                     <td>

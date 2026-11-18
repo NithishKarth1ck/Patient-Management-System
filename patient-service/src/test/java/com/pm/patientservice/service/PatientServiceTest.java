@@ -55,7 +55,7 @@ class PatientServiceTest {
         patient.setName("John Doe");
         patient.setEmail("john@example.com");
         patient.setAddress("123 Main St");
-        patient.setdateOfBirth(LocalDate.of(1990, 6, 15));
+        patient.setDateOfBirth(LocalDate.of(1990, 6, 15));
         patient.setRegisteredDate(LocalDate.of(2024, 1, 10));
 
         requestDTO = new PatientRequestDTO();
@@ -78,7 +78,7 @@ class PatientServiceTest {
             second.setName("Jane Doe");
             second.setEmail("jane@example.com");
             second.setAddress("456 Other St");
-            second.setdateOfBirth(LocalDate.of(1995, 3, 20));
+            second.setDateOfBirth(LocalDate.of(1995, 3, 20));
             second.setRegisteredDate(LocalDate.of(2024, 2, 1));
 
             when(patientRepository.findAll()).thenReturn(List.of(patient, second));
@@ -222,7 +222,7 @@ class PatientServiceTest {
             updatedPatient.setName("John Updated");
             updatedPatient.setEmail("john.updated@example.com");
             updatedPatient.setAddress("789 New St");
-            updatedPatient.setdateOfBirth(LocalDate.of(1990, 6, 15));
+            updatedPatient.setDateOfBirth(LocalDate.of(1990, 6, 15));
 
             when(patientRepository.findById(patientId)).thenReturn(Optional.of(patient));
             when(patientRepository.existsByEmailAndIdNot("john.updated@example.com", patientId)).thenReturn(false);

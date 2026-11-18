@@ -7,6 +7,11 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 @Entity
 @Table(name = "patients")
 public class Patient {
@@ -24,7 +29,7 @@ public class Patient {
     private String email;
 
     @NotNull 
-    private Integer phone ;
+    private String phone ;
 
     @NotNull
     private String address;
@@ -34,61 +39,6 @@ public class Patient {
 
     @NotNull
     private LocalDate registeredDate;
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return Name;
-    }
-
-    public void setName(String name) {
-        Name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Integer getPhone(){
-        return phone;
-    }
-
-    public void setPhone(Integer phone){
-        this.phone = phone;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public LocalDate getdateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setdateOfBirth(LocalDate dateOfBirth) {this.dateOfBirth = dateOfBirth;}
-
-    public LocalDate getRegisteredDate() {return registeredDate;}
-
-    public void setRegisteredDate(LocalDate registeredDate) {
-    this.registeredDate = registeredDate;
-}
-
-
-
 
 }
 

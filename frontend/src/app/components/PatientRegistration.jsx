@@ -61,6 +61,7 @@ useEffect(() => {
       name: name.trim(),
       email: email.trim(),
       address: address.trim(),
+      phone,
       dateOfBirth,
       ...(!selectedPatient && { registeredDate })
     };

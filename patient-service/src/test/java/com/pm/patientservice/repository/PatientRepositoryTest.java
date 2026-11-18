@@ -58,14 +58,14 @@ class PatientRepositoryTest {
         patientA.setName("Alice");
         patientA.setEmail("alice@example.com");
         patientA.setAddress("1 Alice Road");
-        patientA.setdateOfBirth(LocalDate.of(1990, 1, 1));
+        patientA.setDateOfBirth(LocalDate.of(1990, 1, 1));
         patientA.setRegisteredDate(LocalDate.of(2024, 1, 1));
 
         patientB = new Patient();
         patientB.setName("Bob");
         patientB.setEmail("bob@example.com");
         patientB.setAddress("2 Bob Street");
-        patientB.setdateOfBirth(LocalDate.of(1985, 5, 20));
+        patientB.setDateOfBirth(LocalDate.of(1985, 5, 20));
         patientB.setRegisteredDate(LocalDate.of(2024, 2, 1));
 
         patientA = patientRepository.save(patientA);
@@ -182,7 +182,7 @@ class PatientRepositoryTest {
             newPatient.setName("Charlie");
             newPatient.setEmail("charlie@example.com");
             newPatient.setAddress("3 Charlie Lane");
-            newPatient.setdateOfBirth(LocalDate.of(2000, 12, 31));
+            newPatient.setDateOfBirth(LocalDate.of(2000, 12, 31));
             newPatient.setRegisteredDate(LocalDate.of(2024, 3, 1));
 
             Patient saved = patientRepository.save(newPatient);
