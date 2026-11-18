@@ -23,6 +23,9 @@ public class Patient {
     @Column(unique = true)
     private String email;
 
+    @NotNull 
+    private Integer phone ;
+
     @NotNull
     private String address;
 
@@ -54,6 +57,14 @@ public class Patient {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Integer getPhone(){
+        return phone;
+    }
+
+    public void setPhone(Integer phone){
+        this.phone = phone;
     }
 
     public String getAddress() {

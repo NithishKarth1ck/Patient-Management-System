@@ -25,7 +25,7 @@ export default function LoginPage() {
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
         {
           method: "POST",
-          body: { email, password },
+          body: { email: email.trim(), password },
         }
       );
 

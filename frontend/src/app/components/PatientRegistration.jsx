@@ -12,6 +12,7 @@ function PatientRegistration({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [registeredDate, setRegisteredDate] = useState("");
 
@@ -30,12 +31,14 @@ useEffect(() => {
     setEmail(selectedPatient.email);
     setAddress(selectedPatient.address);
     setDateOfBirth(selectedPatient.dateOfBirth);
+    setPhone(selectedPatient.phone);
   } else {
     setName("");
     setEmail("");
     setAddress("");
     setDateOfBirth("");
     setRegisteredDate("");
+    setPhone("");
   }
 }, [selectedPatient]);
 
@@ -87,6 +90,7 @@ const url = selectedPatient
       if (!selectedPatient) {
         setName("");
         setEmail("");
+        setPhone("");
         setAddress("");
         setDateOfBirth("");
         setRegisteredDate("");
@@ -109,11 +113,6 @@ const url = selectedPatient
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>
-        {selectedPatient
-          ? "Edit Patient"
-          : "Register New Patient"}
-      </h2>
 
       {successMessage && <p>{successMessage}</p>}
       {errorMessage && <p>{errorMessage}</p>}
@@ -133,6 +132,15 @@ const url = selectedPatient
         type="email"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
+        required
+      />
+
+      <label htmlFor="phone">Phone</label>
+      <input
+        id="phone"
+        type="number"
+        value={phone}
+        onChange={(event) => setPhone(event.target.value)}
         required
       />
 
