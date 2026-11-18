@@ -83,6 +83,7 @@ catch (Exception e) {
         patient.setName(patientRequestDTO.getName());
         patient.setAddress(patientRequestDTO.getAddress());
         patient.setEmail(patientRequestDTO.getEmail());
+        patient.setPhone(patientRequestDTO.getPhone());
         patient.setDateOfBirth(LocalDate.parse(patientRequestDTO.getDateOfBirth()));
 
         Patient updatedPatient = patientRepository.save(patient);

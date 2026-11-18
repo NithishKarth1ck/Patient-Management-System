@@ -139,7 +139,8 @@ const url = selectedPatient
       <label htmlFor="phone">Phone</label>
       <input
         id="phone"
-        type="number"
+        type="tel"
+        inputMode="tel"
         value={phone}
         onChange={(event) => setPhone(event.target.value)}
         required
