@@ -24,14 +24,16 @@ public class PatientService {
     private final PatientRepository patientRepository;
     private final BillingServiceGrpcClient billingServiceGrpcClient;
     private final kafkaProducer kafkaProducer;
+    private final EmailService emailService;
 
     private static final Logger log = LoggerFactory.getLogger(PatientService.class);
 
 
-    public PatientService(PatientRepository patientRepository, BillingServiceGrpcClient billingServiceGrpcClient, kafkaProducer kafkaProducer) {
+    public PatientService(PatientRepository patientRepository, BillingServiceGrpcClient billingServiceGrpcClient, kafkaProducer kafkaProducer, EmailService emailService) {
         this.patientRepository = patientRepository;
         this.billingServiceGrpcClient = billingServiceGrpcClient;
         this.kafkaProducer = kafkaProducer;
+        this.emailService = emailService;
     }
 
     public List<PatientResponseDTO> getPatients (){
@@ -51,28 +53,47 @@ public class PatientService {
     }
 
     public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO) {
-        if(patientRepository.existsByEmail(patientRequestDTO.getEmail())) {
-            throw new EmailAlreadyExistsException("A patient with this email already exists "+patientRequestDTO.getEmail());
-        }
-        Patient newPatient = patientRepository.save(
-                PatientMapper.toModel(patientRequestDTO));
-   try {
-        billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(),
-                newPatient.getName(), newPatient.getEmail());
+
+    if (patientRepository.existsByEmail(patientRequestDTO.getEmail())) {
+        throw new EmailAlreadyExistsException(
+                "A patient with this email already exists " + patientRequestDTO.getEmail()
+        );
+    }
+
+    Patient newPatient = patientRepository.save(
+            PatientMapper.toModel(patientRequestDTO)
+    );
+
+    try {
+        billingServiceGrpcClient.createBillingAccount(
+                newPatient.getId().toString(),
+                newPatient.getName(),
+                newPatient.getEmail()
+        );
     } catch (Exception e) {
-        // Log the error but continue
-       log.error("Could not create billing account: {}", e.getMessage());
+        log.error("Could not create billing account: {}", e.getMessage());
     }
-    
-try {
-    kafkaProducer.sendEvent(newPatient);
-    log.info("Kafka event sent successfully");
-    } 
-catch (Exception e) {
-    log.warn("Kafka not available, skipping event: {}", e.getMessage());
+
+    try {
+        kafkaProducer.sendEvent(newPatient);
+        log.info("Kafka event sent successfully");
+    } catch (Exception e) {
+        log.warn("Kafka not available, skipping event: {}", e.getMessage());
     }
-        return PatientMapper.toDTO(newPatient);
+
+    try {
+        emailService.sendPatientRegistrationEmail(
+                newPatient.getName(),
+                newPatient.getEmail()
+        );
+        log.info("Registration email sent successfully to patient ID: {}", newPatient.getId());
+    } catch (Exception e) {
+        log.error("Could not send patient registration email for patient ID {}: {}",
+                newPatient.getId(), e.getMessage(), e);
     }
+
+    return PatientMapper.toDTO(newPatient);
+}
 
     public PatientResponseDTO updatePatient(UUID id, PatientRequestDTO patientRequestDTO) {
         Patient patient = patientRepository.findById(id).orElseThrow(()->new PatientNotFoundException("patient not found with ID: "+id));
