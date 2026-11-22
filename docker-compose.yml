@@ -61,7 +61,9 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
 
       MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}      
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+
+      FAST2SMS_API_KEY: ${FAST2SMS_API_KEY}      
     networks:
       - internal
     restart: unless-stopped

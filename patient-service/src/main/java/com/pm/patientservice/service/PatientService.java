@@ -25,15 +25,17 @@ public class PatientService {
     private final BillingServiceGrpcClient billingServiceGrpcClient;
     private final kafkaProducer kafkaProducer;
     private final EmailService emailService;
+    private final SmsService smsService;
 
     private static final Logger log = LoggerFactory.getLogger(PatientService.class);
 
 
-    public PatientService(PatientRepository patientRepository, BillingServiceGrpcClient billingServiceGrpcClient, kafkaProducer kafkaProducer, EmailService emailService) {
+    public PatientService(PatientRepository patientRepository, BillingServiceGrpcClient billingServiceGrpcClient, kafkaProducer kafkaProducer, EmailService emailService, SmsService smsService) {
         this.patientRepository = patientRepository;
         this.billingServiceGrpcClient = billingServiceGrpcClient;
         this.kafkaProducer = kafkaProducer;
         this.emailService = emailService;
+        this.smsService = smsService;
     }
 
     public List<PatientResponseDTO> getPatients (){
@@ -91,6 +93,20 @@ public class PatientService {
         log.error("Could not send patient registration email for patient ID {}: {}",
                 newPatient.getId(), e.getMessage(), e);
     }
+
+    try {
+    smsService.sendRegistrationSms(
+            newPatient.getName(),
+            newPatient.getPhone()
+    );
+
+    log.info("Registration SMS sent successfully to patient ID: {}",
+            newPatient.getId());
+
+} catch (Exception e) {
+    log.error("Could not send registration SMS for patient ID {}: {}",
+            newPatient.getId(), e.getMessage(), e);
+}
 
     return PatientMapper.toDTO(newPatient);
 }
