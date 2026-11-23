@@ -1,14 +1,17 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { apiRequest } from "@/lib/patientAPI";
+import ReCaptcha from "react-google-recaptcha";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [captchaToken, setCaptchaToken] = useState(null);
+  const captchaRef = useRef(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -16,10 +19,16 @@ export default function RegisterPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (!captchaToken) {
+      setError("Please complete the CAPTCHA verification.");
+      return;
+       }
+
 
     setLoading(true);
     setError("");
     setSuccess("");
+    
 
     try {
       const response = await apiRequest(
@@ -30,6 +39,7 @@ export default function RegisterPage() {
             name: name.trim(),
             email: email.trim(),
             password,
+            captchaToken
           },
         }
       );
@@ -41,8 +51,12 @@ export default function RegisterPage() {
       setName("");
       setEmail("");
       setPassword("");
+      setCaptchaToken(null);
+      captchaRef.current?.reset();
     } catch (err) {
       setError(err.message || "Registration failed. Please try again.");
+      setCaptchaToken(null);
+      captchaRef.current?.reset();  
     } finally {
       setLoading(false);
     }
@@ -86,6 +100,13 @@ export default function RegisterPage() {
             required
           />
         </div>
+
+        
+         <ReCaptcha
+          ref={captchaRef}
+          sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+          onChange={(token) => setCaptchaToken(token)}
+         />
 
         <button type="submit" disabled={loading}>
           {loading ? "Creating Account..." : "Register"}
