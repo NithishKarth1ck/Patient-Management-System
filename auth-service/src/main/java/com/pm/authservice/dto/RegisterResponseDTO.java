@@ -3,7 +3,7 @@ package com.pm.authservice.dto;
 import java.util.UUID;
 
 public class RegisterResponseDTO {
-        private final UUID id;
+    private final UUID id;
     private final String email;
     private final String message;
 

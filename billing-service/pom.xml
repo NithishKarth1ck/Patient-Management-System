@@ -118,6 +118,15 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+  <profile>
+    <id>windows-ide</id>
+    <activation><os><family>windows</family></os></activation>
+    <properties>
+      <os.detected.classifier>windows-x86_64</os.detected.classifier>
+    </properties>
+  </profile>
+</profiles>
 
 
 
