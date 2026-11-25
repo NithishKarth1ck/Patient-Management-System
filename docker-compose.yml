@@ -159,6 +159,7 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_SQL_INIT_MODE: always
       SPRING_JPA_SHOW_SQL: true
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY}
     ports:
       - "4005:4005"
     networks:
