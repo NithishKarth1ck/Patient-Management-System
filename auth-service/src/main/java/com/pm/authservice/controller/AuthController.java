@@ -7,6 +7,7 @@ import com.pm.authservice.dto.RegisterResponseDTO;
 import com.pm.authservice.exception.ErrorResponse;
 import com.pm.authservice.model.User;
 import com.pm.authservice.service.AuthService;
+import com.pm.authservice.service.CaptchaVerificationService;
 import com.pm.authservice.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,17 +31,31 @@ import java.util.Optional;
 public class AuthController {
 
     private final UserService userService;
-
     private final AuthService authService;
+    private final CaptchaVerificationService captchaVerificationService;
 
-    public AuthController(AuthService authService, UserService userService) {
+    public AuthController(
+            AuthService authService,
+            UserService userService,
+            CaptchaVerificationService captchaVerificationService) {
         this.authService = authService;
         this.userService = userService;
+        this.captchaVerificationService = captchaVerificationService;
     }
 
     @Operation(summary = "Register a new user")
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDTO registerRequestDTO) {
+        try {
+            if (!captchaVerificationService.verifyToken(registerRequestDTO.getCaptchaToken())) {
+                return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("CAPTCHA verification failed"));
+            }
+        } catch (RestClientException e) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse("CAPTCHA verification service unavailable"));
+        }
+
         try {
             User user = userService.registerUser(
                 registerRequestDTO.getName(),
@@ -64,22 +80,21 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(
             @Valid @RequestBody LoginRequestDTO loginRequestDTO){
-        Optional<String>tokenOptional = authService.authenticate(loginRequestDTO);
+        Optional<String> tokenOptional = authService.authenticate(loginRequestDTO);
 
-        if(tokenOptional.isEmpty()){
+        if (tokenOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         String token = tokenOptional.get();
         return ResponseEntity.ok(new LoginResponseDTO(token));
-
     }
 
     @Operation(summary = "Validate Token")
     @GetMapping("/validate")
     public ResponseEntity<Void> validateToken(
-            @RequestHeader("Authorization")String authHeader){
-        if(authHeader == null || !authHeader.startsWith("Bearer ")){
+            @RequestHeader("Authorization") String authHeader){
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return authService.validateToken(authHeader.substring(7))
@@ -93,5 +108,4 @@ public class AuthController {
         String hash = encoder.encode(password);
         return ResponseEntity.ok(hash);
     }
-
 }
