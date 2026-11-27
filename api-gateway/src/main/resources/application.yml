@@ -1,10 +1,9 @@
-
 server:
   port: 4004
 
 auth:
   service:
-    url: http://auth-service:4005
+    url: ${AUTH_SERVICE_URL:http://localhost:4005}
 
 spring:
   cloud:
@@ -15,6 +14,7 @@ spring:
           '[/**]':
             allowedOrigins:
               - "http://localhost:3000"
+              - "https://patient-management-system-frontend-blue.vercel.app"
             allowedMethods:
               - GET
               - POST
@@ -28,14 +28,14 @@ spring:
 
       routes:
         - id: auth-service-route
-          uri: http://auth-service:4005
+          uri: ${AUTH_SERVICE_URL:http://localhost:4005}
           predicates:
             - Path=/auth/**
           filters:
             - StripPrefix=1
 
         - id: patient-service-route
-          uri: http://patient-service:4000
+          uri: ${PATIENT_SERVICE_URL:http://localhost:4000}
           predicates:
             - Path=/api/patients,/api/patients/**
           filters:
@@ -43,14 +43,14 @@ spring:
             - JwtValidation
 
         - id: api-docs-patient-route
-          uri: http://patient-service:4000
+          uri: ${PATIENT_SERVICE_URL:http://localhost:4000}
           predicates:
             - Path=/api-docs/patients
           filters:
             - RewritePath=/api-docs/patients,/v3/api-docs
 
         - id: api-docs-auth-route
-          uri: http://auth-service:4005
+          uri: ${AUTH_SERVICE_URL:http://localhost:4005}
           predicates:
             - Path=/api-docs/auth
           filters:

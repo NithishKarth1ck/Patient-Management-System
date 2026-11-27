@@ -2,8 +2,6 @@ package com.pm.patientservice.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pm.patientservice.dto.PatientRequestDTO;
-import com.pm.patientservice.grpc.BillingServiceGrpcClient;
-import com.pm.patientservice.kafka.kafkaProducer;
 import com.pm.patientservice.repository.PatientRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,9 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 // Full integration test: real HTTP → real Service → real Repository → real PostgreSQL.
 //
-// BillingServiceGrpcClient and kafkaProducer are @MockitoBean (replaces deprecated @MockBean)
-// because they depend on out-of-process infrastructure (billing-service, Kafka broker)
-// that is not part of this test's scope.
+// Notification integrations are mocked because external email/SMS providers are outside this test's scope.
 //
 // Exception → HTTP mapping tests are excluded — they depend on a @ControllerAdvice
 // that does not exist yet in your codebase. The tests that ARE here exercise
@@ -54,18 +50,14 @@ class PatientIntegrationTest {
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-        // Prevent Kafka auto-configuration from failing at context startup.
-        // kafkaProducer is @MockitoBean so Kafka infra is never actually called.
-        registry.add("spring.autoconfigure.exclude",
-                () -> "org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration");
     }
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private PatientRepository patientRepository;
 
-    @MockitoBean private BillingServiceGrpcClient billingServiceGrpcClient;
-    @MockitoBean private kafkaProducer kafkaProducer;
+    @MockitoBean private com.pm.patientservice.service.EmailService emailService;
+    @MockitoBean private com.pm.patientservice.service.SmsService smsService;
 
     @BeforeEach
     void cleanDatabase() {
