@@ -4,7 +4,7 @@ on:
   push:
     branches: [ master, deployment/cloud-run-neon ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, deployment/cloud-run-neon ]
 
 jobs:
   test:
