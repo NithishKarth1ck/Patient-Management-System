@@ -35,7 +35,13 @@ The Auth Service uses `DB_SCHEMA=auth`; Patient Service uses `DB_SCHEMA=patient`
 
 **Important:** Patient's existing `data.sql` targets a legacy table named `patient`, while the JPA entity maps to `patients`. SQL initialization is disabled in the deployment configuration so that this incompatible seed script is not run. The new database starts without demo patient rows; create test records through the application after deployment.
 
-## 2. Create Secret Manager secrets
+## 2. Enable Secret Manager and create secrets
+
+Enable the Secret Manager API if it is not already enabled:
+
+```powershell
+gcloud services enable secretmanager.googleapis.com --project pms-deployment-2026
+```
 
 Create these seven secrets in Google Cloud Secret Manager in project `pms-deployment-2026`:
 
@@ -100,9 +106,9 @@ After all seven secrets exist and the Cloud Run runtime identity can access them
 .\build-and-push.ps1 -Deploy
 ```
 
-This builds/pushes the images and replaces the `pms-api` service in `asia-south1`. The first container is the only ingress container. Auth and Patient are sidecars; they are not exposed as independent public services.
+This builds/pushes the images and replaces the `pms-api` service in `asia-south1`. The script also grants `allUsers` the Cloud Run Invoker role so the Vercel browser frontend can call the public Gateway. Patient endpoints remain protected by the Gateway's JWT validation. The first container is the only ingress container. Auth and Patient are sidecars; they are not exposed as independent public services.
 
-The deployment template uses 1 vCPU and 512 MiB per container, no minimum instances, and a maximum scale of two instances. These are starting settings for a portfolio demo, not a guarantee of zero cost. Monitor the budget and Cloud Run usage.
+The deployment template uses 1 vCPU and 512 MiB per container, no minimum instances, and a maximum scale of two instances. The service is publicly invokable because the browser-based Vercel frontend must call it; only the Gateway is exposed, and patient operations still require JWT validation. These are starting settings for a portfolio demo, not a guarantee of zero cost. Monitor the budget and Cloud Run usage.
 
 If the service already exists and you only need to deploy the images currently pushed, the script still rebuilds and pushes before replacing it. Check deployment status with:
 
