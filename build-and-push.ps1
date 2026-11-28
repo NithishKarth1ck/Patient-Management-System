@@ -52,6 +52,7 @@ Write-Host "Rendered service file: cloud-run-service.rendered.yaml"
 if ($Deploy) {
     Write-Host "Deploying Cloud Run service..."
     Invoke-Checked "gcloud" @("run", "services", "replace", "./cloud-run-service.rendered.yaml", "--region", $Region, "--project", $ProjectId)
+    Invoke-Checked "gcloud" @("run", "services", "add-iam-policy-binding", "pms-api", "--region", $Region, "--project", $ProjectId, "--member=allUsers", "--role=roles/run.invoker")
     Invoke-Checked "gcloud" @("run", "services", "describe", "pms-api", "--region", $Region, "--project", $ProjectId, "--format", "value(status.url)")
 }
 else {
