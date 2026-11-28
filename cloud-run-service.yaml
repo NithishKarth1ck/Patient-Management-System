@@ -36,7 +36,7 @@ spec:
               port: 8080
             timeoutSeconds: 5
             periodSeconds: 10
-            failureThreshold: 30
+            failureThreshold: 20
 
         - name: auth-service
           image: asia-south1-docker.pkg.dev/PROJECT_ID/pms-services/auth-service:IMAGE_TAG
@@ -78,7 +78,7 @@ spec:
               port: 4005
             timeoutSeconds: 5
             periodSeconds: 10
-            failureThreshold: 30
+            failureThreshold: 20
 
         - name: patient-service
           image: asia-south1-docker.pkg.dev/PROJECT_ID/pms-services/patient-service:IMAGE_TAG
@@ -110,4 +110,4 @@ spec:
               port: 4000
             timeoutSeconds: 5
             periodSeconds: 10
-            failureThreshold: 30
+            failureThreshold: 20
