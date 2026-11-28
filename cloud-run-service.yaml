@@ -1,0 +1,111 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: pms-api
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/container-dependencies: '{"gateway":["auth-service","patient-service"]}'
+    spec:
+      containerConcurrency: 40
+      timeoutSeconds: 300
+      containers:
+        # First container is the only public ingress container.
+        - name: gateway
+          image: asia-south1-docker.pkg.dev/PROJECT_ID/pms-services/api-gateway:IMAGE_TAG
+          ports:
+            - name: http1
+              containerPort: 8080
+          env:
+            - name: AUTH_SERVICE_URL
+              value: http://localhost:4005
+            - name: PATIENT_SERVICE_URL
+              value: http://localhost:4000
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            timeoutSeconds: 5
+            periodSeconds: 10
+            failureThreshold: 30
+
+        - name: auth-service
+          image: asia-south1-docker.pkg.dev/PROJECT_ID/pms-services/auth-service:IMAGE_TAG
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: neon-jdbc-url
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: auth-db-username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: auth-db-password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: jwt-secret
+            - name: RECAPTCHA_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: recaptcha-secret-key
+            - name: DB_SCHEMA
+              value: auth
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 4005
+            timeoutSeconds: 5
+            periodSeconds: 10
+            failureThreshold: 30
+
+        - name: patient-service
+          image: asia-south1-docker.pkg.dev/PROJECT_ID/pms-services/patient-service:IMAGE_TAG
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: neon-jdbc-url
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: patient-db-username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: patient-db-password
+            - name: DB_SCHEMA
+              value: patient
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 4000
+            timeoutSeconds: 5
+            periodSeconds: 10
+            failureThreshold: 30
