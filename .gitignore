@@ -58,3 +58,8 @@ next-env.d.ts
 **/out/
 **/build/
 **/coverage/
+
+# Generated Cloud Run deployment output and local secrets
+cloud-run-service.rendered.yaml
+secrets/
+*.secret
