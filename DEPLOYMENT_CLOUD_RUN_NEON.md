@@ -33,6 +33,8 @@ jdbc:postgresql://YOUR_NEON_HOST/YOUR_DATABASE?sslmode=require
 
 The Auth Service uses `DB_SCHEMA=auth`; Patient Service uses `DB_SCHEMA=patient`. Each role owns its schema, so Hibernate can create/update its own tables without owning the other service's data.
 
+For local Docker Compose, copy `.env.example` to `.env`, set `DB_PASSWORD`, and generate/set `JWT_SECRET`. The populated `.env` is ignored by Git. If starting Auth Service directly outside Compose, set `JWT_SECRET` in the process environment first; there is intentionally no insecure default.
+
 **Important:** Patient's existing `data.sql` targets a legacy table named `patient`, while the JPA entity maps to `patients`. SQL initialization is disabled in the deployment configuration so that this incompatible seed script is not run. The new database starts without demo patient rows; create test records through the application after deployment.
 
 ## 2. Enable Secret Manager and create secrets
