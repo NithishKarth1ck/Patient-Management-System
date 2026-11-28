@@ -8,6 +8,8 @@ spec:
   template:
     metadata:
       annotations:
+        run.googleapis.com/execution-environment: gen2
+        autoscaling.knative.dev/maxScale: "2"
         run.googleapis.com/container-dependencies: '{"gateway":["auth-service","patient-service"]}'
     spec:
       containerConcurrency: 40
