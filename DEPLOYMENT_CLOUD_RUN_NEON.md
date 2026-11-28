@@ -110,7 +110,7 @@ After all seven secrets exist and the Cloud Run runtime identity can access them
 
 This builds/pushes the images and replaces the `pms-api` service in `asia-south1`. The script also grants `allUsers` the Cloud Run Invoker role so the Vercel browser frontend can call the public Gateway. Patient endpoints remain protected by the Gateway's JWT validation. The first container is the only ingress container. Auth and Patient are sidecars; they are not exposed as independent public services.
 
-The deployment template uses 1 vCPU and 512 MiB per container, no minimum instances, and a maximum scale of two instances. The service is publicly invokable because the browser-based Vercel frontend must call it; only the Gateway is exposed, and patient operations still require JWT validation. These are starting settings for a portfolio demo, not a guarantee of zero cost. Monitor the budget and Cloud Run usage.
+The deployment template uses 2 vCPU total (Gateway 1 vCPU, each sidecar 0.5 vCPU) and 512 MiB per container, request-based billing, maximum concurrency 1, no minimum instances, and a maximum scale of two instances. The 0.5-vCPU sidecars require the first-generation execution environment and concurrency 1; this is a low-throughput demo configuration, not a production performance profile. The service is publicly invokable because the browser-based Vercel frontend must call it; only the Gateway is exposed, and patient operations still require JWT validation. These are starting settings for a portfolio demo, not a guarantee of zero cost. Monitor the budget and Cloud Run usage.
 
 If the service already exists and you only need to deploy the images currently pushed, the script still rebuilds and pushes before replacing it. Check deployment status with:
 
