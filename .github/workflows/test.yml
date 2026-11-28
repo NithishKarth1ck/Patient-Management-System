@@ -2,7 +2,7 @@ name: Patient Service Tests
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, deployment/cloud-run-neon ]
   pull_request:
     branches: [ master ]
 
