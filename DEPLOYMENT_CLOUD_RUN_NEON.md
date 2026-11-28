@@ -1,61 +1,156 @@
-# Free Portfolio Deployment Plan (Cloud Run + Neon)
+# Deploy Patient Management System — Cloud Run + Neon
 
-Target branch: `deployment/cloud-run-neon`
+This guide is for the `deployment/cloud-run-neon` branch. The frontend remains on Vercel. The three Spring Boot containers run as one Cloud Run service; only the API Gateway receives public ingress.
 
-## Target architecture
+## Current deployment layout
 
-- Next.js frontend: Vercel (existing deployment)
-- One Cloud Run service with three containers in one instance:
-  - API Gateway: ingress container, port 4004
-  - Auth Service: sidecar, port 4005
-  - Patient Service: sidecar, port 4000
-- Neon PostgreSQL: one hosted Postgres database, with separate schemas for auth and patient data
-- Cloud Run service scales to zero when idle. A warm-up route/page will send health probes before an interview demo.
+- Vercel: Next.js frontend
+- Cloud Run service: `pms-api`, region `asia-south1`
+  - `gateway`: public ingress, Cloud Run port 8080
+  - `auth-service`: private sidecar, localhost port 4005
+  - `patient-service`: private sidecar, localhost port 4000
+- Neon: one PostgreSQL database, two schemas (`auth`, `patient`) and two database roles
 
-## Why one Cloud Run service with sidecars
+The gateway's Cloud Run port is supplied by the `PORT` environment variable. Locally it defaults to 4004. Cloud Run sidecars share localhost networking. Container startup dependencies are declared in `cloud-run-service.yaml` and the sidecars expose readiness probes.
 
-Only the Gateway receives public ingress. The backend containers share localhost networking and are not individually exposed as public services. This avoids bypassing the API Gateway's JWT validation by calling Patient Service directly. The three containers wake together, so the warm-up procedure is simpler.
+## 1. Create Neon database schemas and roles
 
-## Planned environment variables
+Create a Neon project/database. In the Neon SQL Editor, using the database owner role, create two app roles and schemas. Replace the example passwords with strong unique values; do not commit them.
 
-Gateway:
-- `AUTH_SERVICE_URL=http://localhost:4005`
-- `PATIENT_SERVICE_URL=http://localhost:4000`
+```sql
+CREATE ROLE auth_app LOGIN PASSWORD 'REPLACE_WITH_AUTH_PASSWORD';
+CREATE ROLE patient_app LOGIN PASSWORD 'REPLACE_WITH_PATIENT_PASSWORD';
 
-Auth Service:
-- `SPRING_DATASOURCE_URL` (Neon JDBC URL)
-- `SPRING_DATASOURCE_USERNAME`
-- `SPRING_DATASOURCE_PASSWORD`
-- `JWT_SECRET`
-- `RECAPTCHA_SECRET_KEY`
+CREATE SCHEMA auth AUTHORIZATION auth_app;
+CREATE SCHEMA patient AUTHORIZATION patient_app;
+```
 
-Patient Service:
-- `SPRING_DATASOURCE_URL` (Neon JDBC URL)
-- `SPRING_DATASOURCE_USERNAME`
-- `SPRING_DATASOURCE_PASSWORD`
-- optional `MAIL_USERNAME`, `MAIL_PASSWORD`, `FAST2SMS_API_KEY`
+Use the direct Neon connection host initially (not the pooled `-pooler` host) and require SSL. The JDBC URL format is:
 
-## Database isolation
+```
+jdbc:postgresql://YOUR_NEON_HOST/YOUR_DATABASE?sslmode=require
+```
 
-Create distinct schemas (e.g. `auth` and `patient`) and configure each service's Hibernate default schema. Prefer separate database roles with only schema-specific permissions. Keep secrets out of Git and do not commit any `.env` values.
+The Auth Service uses `DB_SCHEMA=auth`; Patient Service uses `DB_SCHEMA=patient`. Each role owns its schema, so Hibernate can create/update its own tables without owning the other service's data.
 
-## Interview warm-up
+**Important:** Patient's existing `data.sql` targets a legacy table named `patient`, while the JPA entity maps to `patients`. SQL initialization is disabled in the deployment configuration so that this incompatible seed script is not run. The new database starts without demo patient rows; create test records through the application after deployment.
 
-A dedicated frontend route (planned: `/wakeup`) will poll the Cloud Run Gateway health endpoint and show progress, elapsed time, and a ready state. After it reports ready, open the existing frontend and demonstrate login and CRUD. Health endpoints should reveal only basic status.
+## 2. Create Secret Manager secrets
 
-## Deployment sequence
+Create these seven secrets in Google Cloud Secret Manager in project `pms-deployment-2026`:
 
-1. Verify GCP account and billing setup; use Cloud Run's free tier carefully and configure budgets/alerts (alerts are not hard spending caps).
-2. Create Neon project/database and separate schemas/roles.
-3. Add Actuator health endpoints to Auth and Patient services.
-4. Configure Cloud Run sidecar service YAML, startup probes/dependencies, resources, and secrets.
-5. Build/push container images to Artifact Registry and deploy.
-6. Set Vercel's `NEXT_PUBLIC_API_BASE_URL` to the Cloud Run Gateway URL.
-7. Add and deploy the warm-up page.
-8. Test externally: registration, login, patient CRUD, persistence, cold start and warm-up timing.
+| Secret name | Value |
+|---|---|
+| `neon-jdbc-url` | Neon JDBC URL shown above |
+| `auth-db-username` | `auth_app` |
+| `auth-db-password` | Password chosen for `auth_app` |
+| `patient-db-username` | `patient_app` |
+| `patient-db-password` | Password chosen for `patient_app` |
+| `jwt-secret` | Base64-encoded random secret containing at least 32 random bytes |
+| `recaptcha-secret-key` | Secret key paired with the reCAPTCHA site key used by the frontend |
 
-## Free-tier caveats
+Generate a JWT secret locally in PowerShell (do not send it in chat or commit it):
 
-- Cloud Run is usage-based and free-tier limits are not a hard billing cap. Outbound network, image storage/build, and other products can incur charges.
-- Neon free tier has usage and storage limits; it can suspend/scale down compute when idle.
-- Portfolio/demo deployment is not production SLA.
+```powershell
+$bytes = New-Object byte[] 32
+$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+$rng.GetBytes($bytes)
+[Convert]::ToBase64String($bytes)
+```
+
+Copy the output directly into the `jwt-secret` secret value. Auth Service Base64-decodes this value before using it for HMAC signing; do not use an ordinary unencoded password.
+
+The Cloud Run runtime identity needs `Secret Manager Secret Accessor` on each of these secrets. If using the project's default Compute Engine service account, find its email with:
+
+```powershell
+gcloud projects describe pms-deployment-2026 --format="value(projectNumber)"
+```
+
+Its email is `PROJECT_NUMBER-compute@developer.gserviceaccount.com`. Grant that identity `roles/secretmanager.secretAccessor` on each secret (or use a dedicated runtime service account and grant it access instead).
+
+## 3. Build and push the three images
+
+Prerequisites on your Windows machine:
+- Docker Desktop running
+- Google Cloud CLI installed and authenticated
+- Access to project `pms-deployment-2026`
+- Artifact Registry repository `pms-services` already created in `asia-south1`
+
+From the repository root, check out this branch and pull the latest changes:
+
+```powershell
+git switch deployment/cloud-run-neon
+git pull
+gcloud config set project pms-deployment-2026
+```
+
+Build and push all three containers:
+
+```powershell
+.\build-and-push.ps1
+```
+
+The script tags images with the checked-out Git commit, pushes them to Artifact Registry, and generates `cloud-run-service.rendered.yaml`. It does not require the Cloud Build API because Docker builds locally.
+
+## 4. Deploy the Cloud Run service
+
+After all seven secrets exist and the Cloud Run runtime identity can access them, run:
+
+```powershell
+.\build-and-push.ps1 -Deploy
+```
+
+This builds/pushes the images and replaces the `pms-api` service in `asia-south1`. The first container is the only ingress container. Auth and Patient are sidecars; they are not exposed as independent public services.
+
+The deployment template uses 1 vCPU and 512 MiB per container, no minimum instances, and a maximum scale of two instances. These are starting settings for a portfolio demo, not a guarantee of zero cost. Monitor the budget and Cloud Run usage.
+
+If the service already exists and you only need to deploy the images currently pushed, the script still rebuilds and pushes before replacing it. Check deployment status with:
+
+```powershell
+gcloud run services describe pms-api --region asia-south1 --project pms-deployment-2026
+```
+
+## 5. Configure Vercel
+
+In the Vercel project settings, set:
+
+- `NEXT_PUBLIC_API_BASE_URL` = the Cloud Run service URL, with no trailing slash
+- `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` = the public site key paired with the Secret Manager reCAPTCHA secret
+
+Make sure the reCAPTCHA site key allows the deployed Vercel domain. The frontend uses these values at build time, so redeploy Vercel after changing them.
+
+The Gateway CORS configuration currently allows:
+- `https://patient-management-system-frontend-blue.vercel.app`
+- `http://localhost:3000`
+
+If your Vercel deployment uses a different production domain, update the CORS origin in `api-gateway/src/main/resources/application.properties` before deploying.
+
+## 6. Verify the deployment
+
+Replace `CLOUD_RUN_URL` with the service URL.
+
+1. Open `CLOUD_RUN_URL/actuator/health`; expect a basic `UP` response.
+2. Register a user through the frontend (reCAPTCHA must be configured).
+3. Log in and confirm the frontend receives a JWT.
+4. Create a patient, refresh the page, and confirm the patient remains.
+5. Update and delete a patient.
+6. Check Cloud Run logs if a container fails its startup probe or database connection.
+
+Only `/auth/login` and `/auth/register` are exposed through the public Auth route. The Auth `/validate` endpoint is called internally by the Gateway's JWT filter. Patient API requests continue to require a Bearer token.
+
+## What is already prepared in this branch
+
+- Gateway uses `application.properties`, honors Cloud Run's `PORT`, and routes to localhost sidecars.
+- CORS is configured for the current Vercel domain and localhost development.
+- Auth no longer has a hard-coded JWT signing secret fallback.
+- Auth and Patient use configurable PostgreSQL schemas and Actuator readiness probes.
+- Legacy Patient SQL seed initialization is disabled to avoid creating/inserting into the wrong table.
+- Spring Boot versions are aligned to the 3.5 line; Gateway uses the stable Spring Cloud 2025.0.3 release train.
+- Cloud Run multi-container template, secret references, startup dependencies, and Windows build/push/deploy script are included.
+
+## Limitations and follow-up
+
+- The code and deployment template have been prepared, but a live deployment is not complete until Neon, Secret Manager, Artifact Registry image pushes, Cloud Run, and Vercel are configured and verified.
+- No automated migration tool is configured; Hibernate `ddl-auto=update` is retained for this portfolio deployment. For production, replace it with Flyway or Liquibase migrations.
+- The frontend warm-up page is not included; it is optional. Cloud Run scales to zero by default, so the first request after idle may be slower.
+- Cloud Run budget alerts are notifications, not spending caps. Neon and outbound network usage can also incur costs.
