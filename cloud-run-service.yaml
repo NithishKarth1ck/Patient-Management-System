@@ -8,11 +8,11 @@ spec:
   template:
     metadata:
       annotations:
-        run.googleapis.com/execution-environment: gen2
+        run.googleapis.com/execution-environment: gen1
         autoscaling.knative.dev/maxScale: "2"
         run.googleapis.com/container-dependencies: '{"gateway":["auth-service","patient-service"]}'
     spec:
-      containerConcurrency: 40
+      containerConcurrency: 1
       timeoutSeconds: 300
       containers:
         # First container is the only public ingress container.
@@ -70,7 +70,7 @@ spec:
               value: auth
           resources:
             limits:
-              cpu: "1"
+              cpu: "0.5"
               memory: 512Mi
           startupProbe:
             httpGet:
@@ -102,7 +102,7 @@ spec:
               value: patient
           resources:
             limits:
-              cpu: "1"
+              cpu: "0.5"
               memory: 512Mi
           startupProbe:
             httpGet:
